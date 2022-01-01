@@ -1,7 +1,7 @@
 package main
 
 import (
-	middlewares "awesomeProject3/middleware"
+	middlewares "2022calendar/middleware"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"

@@ -1008,10 +1008,13 @@ function confirmUpdateAward(y, m, d) {
     var date = y + '-' + (m < 10 ? 0 : '') + m + '-' + (d < 10 ? 0 : '') + d
     console.log(date)
     $.ajaxSettings.async = false;
-    $.get("http://192.168.31.149:8888/getTodos/day/" + date, function (data) {
+    $.get("http://119.91.214.221:8888/getTodos/day/" + date, function (data) {
         console.log(data)
         var json = data.todos
         var str = ""
+	if(json.length==0){
+		            str += "<p class='xxxxxxx'>" + '在此编辑' + "</p>"
+		        }
         for (var j = 0; j < json.length; j++) {
             str += "<p class='xxxxxxx'>" + json[j].info + "</p>"
         }
@@ -1042,7 +1045,7 @@ function updateAward(date) {
     var data = JSON.stringify({"todos": content});
 
     $.ajaxSettings.async = false;
-    $.post("http://192.168.31.149:8888/updateTodos/day/" + date, {"data": data}, function (data) {
+    $.post("http://119.91.214.221:8888/updateTodos/day/" + date, {"data": data}, function (data) {
         console.log(data)
         var json = data.todos
 

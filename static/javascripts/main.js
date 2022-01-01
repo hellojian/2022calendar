@@ -40,7 +40,7 @@ function main() {
             var resultObj = {}, status = ['待揽收', '已发货', '配送中', '已签收'];
             $.ajaxSettings.async = false;
 
-            $.get("http://192.168.31.149:8888/getTodos/month/" + year + (month < 10 ? "0" : "") + month, function (data) {
+            $.get("http://119.91.214.221:8888/getTodos/month/" + year + (month < 10 ? "0" : "") + month, function (data) {
                 console.log(data)
                 var json = data.todos
                 for (ith in json) {

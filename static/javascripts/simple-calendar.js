@@ -257,7 +257,7 @@ var SimpleCalendar = function () {
             width: '500px',
             height: '500px',
             language: 'CH', //语言
-            showLunarCalendar: true, //阴历
+            showLunarCalendar: false, //阴历
             showHoliday: true, //休假
             showFestival: true, //节日
             showLunarFestival: true, //农历节日
@@ -484,7 +484,8 @@ var SimpleCalendar = function () {
                     if (i == window._MonthWeekToDay - 7) hideMonthWeekToDay = true;
                 }
                 daysElement[i].querySelector('.day').innerHTML = writeday;
-
+                var date= writeyear + '-' + (writemonth < 10 ? '0' + writemonth : writemonth) + '-' + (writeday < 10 ? '0' + writeday : writeday);
+		daysElement[i].querySelector('.day').setAttribute('day_id',date);
                 //判断是否添加阴历
                 if (this._options.showLunarCalendar) {
                     var val = new LunarHelp(writeyear, writemonth, writeday).getLunarDayName();
@@ -532,8 +533,8 @@ var SimpleCalendar = function () {
                     daysElement.forEach(function (v, i) {
                         var day = +v.querySelector('.day').innerHTML;
                         if (day == 1) currentmonth++;
-                        if (currentmonth != month) return;
-                        var val = data[year + '-' + (currentmonth < 10 ? '0' + currentmonth : currentmonth) + '-' + (day < 10 ? '0' + day : day)];
+                        var date = v.querySelector('.day').getAttribute("day_id")
+			var val = data[date];
                         if (typeof (val) == 'object') {
                             v.classList.add('sc-mark');
                             for (var i in val) {
@@ -677,7 +678,8 @@ var SimpleCalendar = function () {
                 };
                 v.onclick = function () {
                     var di = this.querySelector('.wx-day').querySelector('.day').innerHTML
-                    confirmUpdateAward(selectYear.value, selectMonth.value, di)
+	            var date = this.querySelector('.wx-day').querySelector('.day').getAttribute("day_id")
+                    confirmUpdateAward(date)
                     calendar.selectDay = v;
                     var pre = container.querySelector('.sc-selected');
                     if (pre) pre.classList.remove('sc-selected');
@@ -1004,11 +1006,11 @@ function onTips($obj, text) {
 setHeight();
 
 
-function confirmUpdateAward(y, m, d) {
-    var date = y + '-' + (m < 10 ? 0 : '') + m + '-' + (d < 10 ? 0 : '') + d
+function confirmUpdateAward(date) {
     console.log(date)
     $.ajaxSettings.async = false;
-    $.get("http://119.91.214.221:8888/getTodos/day/" + date, function (data) {
+    var db = getQueryVariable('db')
+    $.get("http://119.91.214.221:8888/getTodos/"+db+"/day/" + date, function (data) {
         console.log(data)
         var json = data.todos
         var str = ""
@@ -1034,6 +1036,17 @@ function confirmUpdateAward(y, m, d) {
 
 }
 
+function getQueryVariable(variable)
+{
+	       var query = window.location.search.substring(1);
+	       var vars = query.split("&");
+	       for (var i=0;i<vars.length;i++) {
+		                      var pair = vars[i].split("=");
+		                      if(pair[0] == variable){return pair[1];}
+		              }
+	       return(false);
+}
+
 function updateAward(date) {
     console.log(content)
     var content = []
@@ -1045,7 +1058,7 @@ function updateAward(date) {
     var data = JSON.stringify({"todos": content});
 
     $.ajaxSettings.async = false;
-    $.post("http://119.91.214.221:8888/updateTodos/day/" + date, {"data": data}, function (data) {
+    $.post("http://119.91.214.221:8888/updateTodos/"+getQueryVariable('db')+"/day/" + date, {"data": data}, function (data) {
         console.log(data)
         var json = data.todos
 

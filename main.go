@@ -8,6 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"os"
 	"strings"
+	"time"
 )
 
 type Todo struct {
@@ -34,25 +35,31 @@ func main() {
 
 	//2.绑定路由规则，执行的函数
 	r.Use(middlewares.Cors())
-	r.GET("/getTodos/month/:month", func(context *gin.Context) {
+	r.GET("/getTodos/:db/month/:month", func(context *gin.Context) {
 		session := Get(context)
 		defer session.Close()
-		todos := []Todo{}
-		month := context.Param("month")
-		session.FindAll("todo", bson.M{"month": month}, &todos)
+				todos := []Todo{}
 
-		context.JSON(200, gin.H{"todos": todos})
+						monthReq := context.Param("month")
+								month, _ := time.Parse("20060102 15:04:05", monthReq+"01 15:04:05")
+										month_after := month.AddDate(0, 0, 31)
+												month_before := month.AddDate(0, 0, -1)
+
+														months := [3]string{monthReq,month_before.Format("200601"),month_after.Format("200601")}
+																session.Find(context.Param("db"), bson.M{"month": bson.M{"$in": months}}, &todos)
+
+																		context.JSON(200, gin.H{"todos": todos})
 	})
-	r.GET("/getTodos/day/:date", func(context *gin.Context) {
+	r.GET("/getTodos/:db/day/:date", func(context *gin.Context) {
 		session := Get(context)
 		defer session.Close()
 		todos := []Todo{}
 		month := context.Param("date")
-		session.FindAll("todo", bson.M{"day": month}, &todos)
+		session.FindAll(context.Param("db"), bson.M{"day": month}, &todos)
 
 		context.JSON(200, gin.H{"todos": todos})
 	})
-	r.POST("/updateTodos/day/:date", func(context *gin.Context) {
+	r.POST("/updateTodos/:db/day/:date", func(context *gin.Context) {
 		session := Get(context)
 		defer session.Close()
 		date := context.Param("date")
@@ -65,13 +72,13 @@ func main() {
 			fmt.Println(requset)
 		}
 
-		session.Delete("todo", bson.M{"day": date})
+		session.Delete(context.Param("db"), bson.M{"day": date})
 
 		for _, todo := range requset.Todos {
 			todo.Id = bson.NewObjectId()
 			todo.Month = strings.Replace(date, "-", "", -1)[0:6]
 			todo.Day = date
-			if err := session.Insert("todo", todo); err != nil {
+			if err := session.Insert(context.Param("db"), todo); err != nil {
 				fmt.Print(err)
 			}
 

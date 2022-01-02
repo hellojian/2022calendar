@@ -16,7 +16,7 @@ function main() {
         width: '100%',
         height: '500px',
         language: 'CH', //语言
-        showLunarCalendar: true, //阴历
+        showLunarCalendar: false, //阴历
         showHoliday: false, //休假-暂时禁用
         showFestival: true, //节日
         showLunarFestival: true, //农历节日
@@ -39,8 +39,8 @@ function main() {
             //模拟获取数据start
             var resultObj = {}, status = ['待揽收', '已发货', '配送中', '已签收'];
             $.ajaxSettings.async = false;
-
-            $.get("http://119.91.214.221:8888/getTodos/month/" + year + (month < 10 ? "0" : "") + month, function (data) {
+	    var db = getQueryVariable('db')
+            $.get("http://119.91.214.221:8888/getTodos/"+db+"/month/" + year + (month < 10 ? "0" : "") + month, function (data) {
                 console.log(data)
                 var json = data.todos
                 for (ith in json) {
@@ -84,5 +84,8 @@ function main() {
         }
     });
 }
-
-main();
+if(getQueryVariable('db')==false){
+	        confirm('正确请求（xxx为你的id）：\nhttp://119.91.214.221/index.html?db=xxxx')
+}else{
+	    main()
+}
